@@ -16,60 +16,61 @@ use Carbon\Carbon;
 class ExecuteHandleController extends Controller
 {
     protected $SqlServices;
- 
+
     public function __construct(SqlServices $SqlServices)
     {
         $this->SqlServices = $SqlServices;
     }
 
-	public function execute(Request $request){
+    public function execute(Request $request)
+    {
 
-        $sql    = $request->input('sql',null);
-        $page   = $request->input('page',0);
-        $limit  = $request->input('limit',20); 
-        $page   = ($page == 0 ? 0 : $page - 1 ) * $limit;
+        $sql = $request->input('sql', null);
+        $page = $request->input('page', 0);
+        $limit = $request->input('limit', 20);
+        $page = ($page == 0 ? 0 : $page - 1) * $limit;
 
-        $check  = $request->input('check',false); //点击分页的时候会带上来，这时候不会记录sql
-        $exportType = $request->input('exportType',null); 
+        $check = $request->input('check', false); //点击分页的时候会带上来，这时候不会记录sql
+        $exportType = $request->input('exportType', null);
 
         if (($validResult = $this->SqlServices->validate($sql)) != 'success') {
             return response()->json([
-            	'message' => $validResult
+                'message' => $validResult
             ], 500);
-        }	
+        }
 
-        if(!$check){
-	        $record = new HistorySql();
+        if (!$check) {
+            $record = new HistorySql();
             $record->user_id = Auth::id();
-	        $record->sql     = $sql;
+            $record->sql = $sql;
         }
 
         try {
-            $results = DB::select($sql . " limit ?, ? ",[$page,$limit] );
+            $results = DB::select($sql . " limit ?, ? ", [$page, $limit]);
             $check ?: $record->save();
 
-            if($exportType){
+            if ($exportType) {
                 $fid = uniqid(); //文件ID
                 ExportHandle::dispatch($sql, $fid, $exportType);
-            } 
+            }
             return response()->json([
-                'fid'=> isset($fid) ? $fid.'.'.($exportType == 'excel' ?'csv':'json') : '',
-            	'data'  => $results,
-            	'total' => DB::select($this->SqlServices->editSql($sql))[0]->total
-            ],200);
+                'fid' => isset($fid) ? $fid . '.' . ($exportType == 'excel' ? 'csv' : 'json') : '',
+                'data' => $results,
+                'total' => DB::select($this->SqlServices->editSql($sql))[0]->total
+            ], 200);
 
         } catch (\Exception $e) {
 
-        	if(!$check){
-            	$record->error = $e->getMessage();
-            	$record->save();
-        	}
+            if (!$check) {
+                $record->error = $e->getMessage();
+                $record->save();
+            }
 
-        	//返回错误信息
+            //返回错误信息
             return response()->json([
-            	'message' => 'Error executing SQL: ' . $e->getMessage()
+                'message' => 'Error executing SQL: ' . $e->getMessage()
             ], 500);
         }
-	}
+    }
 
 }

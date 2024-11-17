@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UserRegisterVerify extends FormRequest
 {
-    
+
     /**
      * rules验证失败则不往下
      */
@@ -17,7 +17,7 @@ class UserRegisterVerify extends FormRequest
      */
     protected $redirect = '/login';
 
-  
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -39,10 +39,10 @@ class UserRegisterVerify extends FormRequest
         return [
             'name.required' => 'The user name cannot be empty',
             'name.max' => 'The user name cannot exceed 10 characters',
-            'name.unique'=>'The user name already exists',
+            'name.unique' => 'The user name already exists',
             'password.required' => 'The password cannot be empty',
-            'password.min'=>'The password must contain at least 6 characters',
-            'password.max'=>'The password contains a maximum of 32 characters'
+            'password.min' => 'The password must contain at least 6 characters',
+            'password.max' => 'The password contains a maximum of 32 characters'
         ];
     }
 }

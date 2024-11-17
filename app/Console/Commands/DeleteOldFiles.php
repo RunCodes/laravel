@@ -35,7 +35,7 @@ class DeleteOldFiles extends Command
         foreach ($files as $file) {
             $extension = $file->getExtension();
 
-            if (in_array($extension, ['csv', 'json','xlsx']) &&  $now->diffInDays( date('Y-m-d H:i:s',$file->getMTime() ) ) > 1) {
+            if (in_array($extension, ['csv', 'json', 'xlsx']) && $now->diffInDays(date('Y-m-d H:i:s', $file->getMTime())) > 1) {
                 // 删除文件
                 File::delete($file);
                 $this->info("Deleted file: {$file->getFilename()}");

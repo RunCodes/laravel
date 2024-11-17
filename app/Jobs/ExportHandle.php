@@ -23,10 +23,10 @@ class ExportHandle implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($sql, $fid,$type)
+    public function __construct($sql, $fid, $type)
     {
-        $this->sql  = $sql;
-        $this->fid  = $fid;
+        $this->sql = $sql;
+        $this->fid = $fid;
         $this->type = $type;
     }
 
@@ -38,49 +38,50 @@ class ExportHandle implements ShouldQueue
 
         // Log::info("初始: ".memory_get_usage()."B\n");
 
-        $this->fileName = $this->fid . '.'. ($this->type == 'excel' ? 'csv' : 'json') ;
+        $this->fileName = $this->fid . '.' . ($this->type == 'excel' ? 'csv' : 'json');
 
-        $dir = storage_path() . DIRECTORY_SEPARATOR . 'app'. DIRECTORY_SEPARATOR .'public' . DIRECTORY_SEPARATOR;
+        $dir = storage_path() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR;
 
         $offset = 0;
-        $limit  = 10000;
-        $first  = true;
+        $limit = 10000;
+        $first = true;
         while (true) {
 
             // Log::info("使用: ".memory_get_usage()."B\n");
 
-            $array   = [];
-            $results = DB::select($this->sql . " limit ?, ? ",[$offset,$limit] );
+            $array = [];
+            $results = DB::select($this->sql . " limit ?, ? ", [$offset, $limit]);
 
             if (empty($results)) break;
 
             foreach ($results as $key => $val) {
-               array_push($array,(array)$val);
+                array_push($array, (array)$val);
             }
 
             $offset += $limit;
 
 
-            if($this->type == 'excel'){
-                $head =  $first ?  array_keys(current($array)) : [];
-                $this->exportToCsv($array, $dir . $this->fileName,[$head]);
+            if ($this->type == 'excel') {
+                $head = $first ? array_keys(current($array)) : [];
+                $this->exportToCsv($array, $dir . $this->fileName, [$head]);
 
                 $first = false;
-            }else if($this->type == 'json'){
-                $this->exportToJson($array,$dir . $this->fileName);
+            } else if ($this->type == 'json') {
+                $this->exportToJson($array, $dir . $this->fileName);
             }
         }
 
-        Cache::put($this->fileName,'success',86400);
+        Cache::put($this->fileName, 'success', 86400);
     }
 
-    public function exportToCsv(array $data,string $filePath,?array $head){
+    public function exportToCsv(array $data, string $filePath, ?array $head)
+    {
 
         $fileHandle = fopen($filePath, 'a');
 
-        if($head){
+        if ($head) {
             foreach ($head as $row) {
-                if (!fputcsv($fileHandle,$row)) {
+                if (!fputcsv($fileHandle, $row)) {
                     fclose($fileHandle);
                 }
             }
@@ -95,18 +96,18 @@ class ExportHandle implements ShouldQueue
         fclose($fileHandle);
     }
 
-   
-    protected function exportToJson(array $data,string $filePath)
-    {   
+
+    protected function exportToJson(array $data, string $filePath)
+    {
 
         $fileHandle = fopen($filePath, 'a');
 
         // Log::info( "峰值: ".memory_get_peak_usage()."B\n");
 
 
-        foreach($data as $val) fwrite($fileHandle, json_encode($val).PHP_EOL);
+        foreach ($data as $val) fwrite($fileHandle, json_encode($val) . PHP_EOL);
 
         fclose($fileHandle);
-    }   
+    }
 
 }

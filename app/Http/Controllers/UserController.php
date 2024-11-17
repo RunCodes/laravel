@@ -12,14 +12,15 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-	public function login(UserLoginVerify $request){
+    public function login(UserLoginVerify $request)
+    {
 
-		$credentials = $request->validated();
+        $credentials = $request->validated();
 
         $remember = $request->input('remember');
-        $remember = $remember  == 'on' ? true : false;
+        $remember = $remember == 'on' ? true : false;
 
-		if (Auth::attempt($credentials, $remember)){
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             $user = Auth::user();
@@ -30,11 +31,12 @@ class UserController extends Controller
         }
         return response()->json([
             'message' => 'name or password is incorrect',
-        ],500);
-	}
+        ], 500);
+    }
 
 
-    public function register(UserRegisterVerify $request) {
+    public function register(UserRegisterVerify $request)
+    {
 
         $credentials = $request->validated();
 
@@ -68,7 +70,6 @@ class UserController extends Controller
             'redirect' => '/'
         ]);
     }
-
 
 
 }

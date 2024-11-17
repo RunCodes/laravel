@@ -10,7 +10,7 @@ class HistorySql extends Model
     protected $table = 'history_sql';
 
 
-    const UPDATED_AT = null; 
+    const UPDATED_AT = null;
 
 
 }

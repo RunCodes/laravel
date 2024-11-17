@@ -34,3 +34,32 @@ Route::middleware('guest')->prefix('admin')->group(function () {
     });
 });
 
+// 需要登录的路由组
+Route::middleware('auth')->prefix('admin')->group(function () {    
+
+    Route::controller(App\Http\Controllers\UserController::class)->group(function () {
+        Route::get('logout','logout');
+    });
+
+    Route::controller(App\Http\Controllers\ExecuteHandleController::class)->group(function () {
+        Route::post('/execute', 'execute');
+    });
+
+    Route::get('/limited', function () {
+        if (Gate::allows('is-admin',Auth::user())) {  return redirect()->route('dev');}
+        return view('limited');
+    })->name('limited');
+
+    Route::get('/dev', function () {
+        if (Gate::allows('is-admin',Auth::user())) return view('dev'); //判断有无权限
+        return redirect()->route('limited'); 
+    })->name('dev');
+
+
+    Route::controller(App\Http\Controllers\DownloadController::class)->group(function(){
+        Route::get('/consult', 'consult');
+        Route::get('/download', 'download');
+    });
+
+
+});
